@@ -1,8 +1,36 @@
 # CatBot
-Edge computer vision to detect a cat and send a notification to telegram
 
-- Flash the sd card with Raspberry Pi OS (Legacy 32-bit) Full
 
+### Backstory
+Meet CatBot - a little project that turned into a big adventure! It all started with a friendly neighborhood cat that made my doorstep. This furry friend would pop by daily for some cozy time, especially during the cold winter months. Problem was, with me working away in my office, I often missed its visits, and leaving the door open in winter wasn't exactly ideal. Enter CatBot! This nifty system now lets me know when my four-legged buddy is waiting outside.
+
+This journey wasn't just about keeping my feline friend comfy. It was also a deep dive into the world of edge computing and efficient deployment of object detection models. And hey, why not add a dash of convenience with Telegram notifications?
+
+---
+
+### Description
+CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for capturing images and a YOLO model to detect our feline visitor. When the cat is at the door, I get a nifty image notification on Telegram. No more missed hangouts!
+
+---
+
+### Features
+- Real-time cat detection using a camera module.
+- Telegram notifications with images upon detection.
+- Optimized for Raspberry Pi 5 performance.
+
+---
+
+### Requirements
+Raspberry Pi 5
+Camera Module
+Python 3.x
+Telegram Bot API Token
+
+---
+
+### Setup
+
+To Do
 
 ```
 sudo apt update && apt list --upgradable
