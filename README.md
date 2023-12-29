@@ -9,7 +9,7 @@ This journey wasn't just about keeping my feline friend comfy. It was also a dee
 ---
 
 ### Description
-CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for capturing images and a YOLO model to detect our feline visitor. When the cat is at the door, I get a nifty image notification on Telegram. No more missed hangouts!
+CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for capturing images and YOLOv8 model to detect our feline visitor. When the cat is at the door, I get a notification on Telegram. No more missed hangouts!
 
 ---
 
