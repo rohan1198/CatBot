@@ -1,6 +1,6 @@
 import cv2
-import pytest
 import numpy as np
+import pytest
 from unittest.mock import Mock, patch
 
 from src.camera import Camera

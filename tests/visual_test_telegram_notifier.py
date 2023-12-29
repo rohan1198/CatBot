@@ -10,7 +10,7 @@ def main():
     load_dotenv()
     bot_token = os.getenv('TELEGRAM_BOT_TOKEN')
     chat_id = os.getenv('TELEGRAM_CHAT_ID')
-    model_path = os.getenv('MODEL_PATH')
+    model_path = "/home/raspi/cat_detection/models/yolov8n.pt"
 
     # Initialize the CatDetector and Camera
     detector = CatDetector(model_path)
