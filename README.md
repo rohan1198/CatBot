@@ -57,3 +57,46 @@ pip install python-telegram-bot
 pip install ultralytics
 pip install python3-dotenv
 ```
+
+Setup Steps
+Clone the Repository
+Clone this repository to your Raspberry Pi.
+
+sh
+Copy code
+git clone https://github.com/your-repo/cat_detection.git
+cd cat_detection
+Install Required Libraries
+Install necessary Python libraries using pip.
+
+sh
+Copy code
+pip install -r requirements.txt
+The requirements.txt should include:
+
+Copy code
+numpy
+opencv-python
+ultralytics
+python-telegram-bot
+Environment Configuration
+Set up an environment file .env in the project root with the following variables:
+
+env
+Copy code
+TELEGRAM_BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+MODEL_PATH=path_to_your_model
+Run the Script on Boot
+Set up the script to run on boot using either crontab or systemd.
+
+Using Crontab:
+
+sh
+Copy code
+crontab -e
+Add the following line:
+
+bash
+Copy code
+@reboot /bin/bash /home/raspi/cat_detection/cat_detector.sh
