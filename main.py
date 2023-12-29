@@ -53,7 +53,7 @@ async def periodic_detection(bot, chat_id: str):
                     logging.info(f"Majority detection confirmed: {detection_type}")
                     success, encoded_image = cv2.imencode('.jpg', cv2.cvtColor(img_original, cv2.COLOR_BGR2RGB))
                     if success:
-                        await bot.send_photo(chat_id=chat_id, photo=encoded_image.tobytes(), caption=f"{detection_type.capitalize()} detected!")
+                        await bot.send_photo(chat_id=chat_id, photo=encoded_image.tobytes(), caption=f"{detection_type.capitalize()} is at the door!")
                         break
 
                     last_detection_time = current_time
