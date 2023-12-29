@@ -4,7 +4,7 @@
 ### Backstory
 Meet CatBot - a little project that turned into a big adventure! It all started with a friendly neighborhood cat that made my doorstep. This furry friend would pop by daily for some cozy time, especially during the cold winter months. Problem was, with me working away in my office, I often missed its visits, and leaving the door open in winter wasn't exactly ideal. Enter CatBot! This nifty system now lets me know when my four-legged buddy is waiting outside.
 
-This journey wasn't just about keeping my feline friend comfy. It was also a deep dive into the world of edge computing and efficient deployment of object detection models. And hey, why not add a dash of convenience with Telegram notifications?
+This journey wasn't just about keeping my feline friend comfy. It was also a deep dive into the world of edge computing and efficient deployment of object detection models. And hey, why not make it more convenient with Telegram notifications?
 
 ---
 
@@ -14,89 +14,94 @@ CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for
 ---
 
 ### Features
+
 - Real-time cat detection using a camera module.
 - Telegram notifications with images upon detection.
 - Optimized for Raspberry Pi 5 performance.
+- ONNX model inference.
 
 ---
 
 ### Requirements
-Raspberry Pi 5
-Camera Module
-Python 3.x
-Telegram Bot API Token
+
+- Raspberry Pi 5
+- Camera Module
+- Python 3.x
+- Telegram Bot API Token
+- Onnx
 
 ---
 
 ### Setup
 
-To Do
-
 ```
 sudo apt update && apt list --upgradable
 sudo apt upgrade -y && sudo apt dist-upgrade -y
+```
 
+```
 sudo apt autoremove
 sudo apt autoclean
+```
 
+- Setup the python environment
+```
 sudo apt install python3 python3-pip python3-dev python3-venv
 sudo apt install libopenblas-dev
 sudo apt install libatlas-base-dev
+```
 
+```
 mkdir venvs
 cd venvs
 
-python3 -m venv yolocat --system-site-packages
-
+python3 -m venv yolocat --system-site-packages  # Necessary flag to use Picamera2 in a virtual environment
 source ~/venvs/yolocat/bin/activate
-
-pip install --upgrade pip
-pip install --upgrade numpy
-
-pip install python-telegram-bot
-pip install ultralytics
-pip install python3-dotenv
 ```
 
-Setup Steps
-Clone the Repository
-Clone this repository to your Raspberry Pi.
+- Clone the repository
+```
+cd ~
+git clone https://github.com/rohan1198/CatBot.git
+cd ~/CatBot
+```
 
-sh
-Copy code
-git clone https://github.com/your-repo/cat_detection.git
-cd cat_detection
-Install Required Libraries
-Install necessary Python libraries using pip.
-
-sh
-Copy code
+- Install python packages
+```
 pip install -r requirements.txt
-The requirements.txt should include:
+```
 
-Copy code
-numpy
-opencv-python
-ultralytics
-python-telegram-bot
-Environment Configuration
-Set up an environment file .env in the project root with the following variables:
+- Create and populate the .env file
+```
+cd ~/CatBot
+touch .env
+```
 
-env
-Copy code
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
-MODEL_PATH=path_to_your_model
-Run the Script on Boot
-Set up the script to run on boot using either crontab or systemd.
+- The .env file should have the following fields
+```
+TELEGRAM_BOT_TOKEN=your_bot_token  (get this from botfather)
+TELEGRAM_CHAT_ID=your_chat_id      (get this from userinfobot)
+MODEL_PATH=path/to/model.onnx
+```
 
-Using Crontab:
+- Modify path in cat_detector.sh
+```
+VENV_PATH="/home/raspi/venvs/yolocat/bin/activate"
 
-sh
-Copy code
-crontab -e
-Add the following line:
+chmod +x cat_detector.sh
+```
 
-bash
-Copy code
-@reboot /bin/bash /home/raspi/cat_detection/cat_detector.sh
+- Modify the path in catbot.service
+```
+ExecStart=/bin/bash path/to/CatBot/cat_detector.sh
+```
+
+- Autostart
+```
+cd ~/CatBot
+
+sudo cp ~/CatBot/catbot.service /etc/systemd/system/
+
+sudo systemctl enable catbot.service
+sudo systemctl start catbot.service
+```
