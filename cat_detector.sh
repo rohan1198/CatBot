@@ -3,8 +3,8 @@
 # Configuration
 MAX_RETRIES=3
 RETRY_COUNT=0
-SCRIPT_PATH="/home/raspi/cat_detection/main.py"
-LOG_FILE="/home/raspi/cat_detection/logfile.log"
+SCRIPT_PATH="/home/raspi/CatBot/main.py"
+LOG_FILE="/home/raspi/CatBot/logfile.log"
 
 echo "Starting script monitoring" >> "$LOG_FILE"
 

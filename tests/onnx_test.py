@@ -17,7 +17,7 @@ def load_image(img_path, size):
 
 
 def main():
-    onnx_path = "/home/raspi/cat_detection/models/yolov8m.onnx"
+    onnx_path = "/home/raspi/CatBot/models/yolov8m.onnx"
     session = ort.InferenceSession(onnx_path)
 
     img_path = "cat.jpeg"
