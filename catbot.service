@@ -1,0 +1,10 @@
+[Unit]
+Description=Cat Detection system
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /home/raspi/CatBot/cat_detector.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
