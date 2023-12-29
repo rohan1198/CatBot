@@ -1,0 +1,6 @@
+numpy
+onnxruntime
+pytest
+python-dotenv
+python-telegram-bot
+ultralytics
