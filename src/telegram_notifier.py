@@ -1,37 +1,33 @@
 import cv2
-import telegram
 import logging
+import telegram
 import numpy as np
 from typing import Optional
 
 
-class TelegramNotifier(object):
+class TelegramNotifier:
     """
-    A class to handle Telegram notifications.
+    Class to handle Telegram notifications.
 
     Attributes:
-        bot (telegram.Bot): Instance of the Telegram Bot.
-        chat_id (str): Chat ID for sending messages.
+        bot (telegram.Bot): Telegram bot instance.
+        bhat_id (str): The chat ID for sending notifications.
     """
-
     def __init__(self, bot_token: str, chat_id: str):
-        """
-        Initialize the TelegramNotifier with bot token and chat ID.
-
-        Args:
-            bot_token (str): Telegram bot token.
-            chat_id (str): Telegram chat ID.
-        """
-        self.bot = telegram.Bot(token=bot_token)
-        self.chat_id = chat_id
+        try:
+            self.bot = telegram.Bot(token=bot_token)
+            self.chat_id = chat_id
+        except Exception as e:
+            logging.error(f"TelegramNotifier initialization failed: {e}")
+            raise
 
 
     def send_message(self, message: str):
         """
-        Send a text message via Telegram.
+        Sends a text message via Telegram.
 
         Args:
-            message (str): The message text to send.
+            message (str): The message to send.
         """
         try:
             self.bot.send_message(chat_id=self.chat_id, text=message)
@@ -41,7 +37,7 @@ class TelegramNotifier(object):
 
     def send_photo(self, image: np.ndarray, caption: Optional[str] = None):
         """
-        Send a photo via Telegram.
+        Sends a photo via Telegram.
 
         Args:
             image (np.ndarray): The image to send.

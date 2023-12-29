@@ -1,46 +1,50 @@
+import cv2
 import logging
 import numpy as np
-from typing import Tuple, Optional
 from picamera2 import Picamera2
+from typing import Tuple
 from src.detection import CatDetector
 
 
-class Camera(object):
+class Camera:
     """
-    Camera class for capturing images and detecting objects using the CatDetector class
+    Camera class to handle image captures and passing images for detection.
 
     Attributes:
-        detector (CatDetector): An instance of CatDetector for object detection.
-        picam2 (Picamera2): Instance of PiCamera2 for capturing images
-        frame_size (Tuple[int, int]): The resolution of the camera.
+        detector (CatDetector): The object detection pipeline.
+        picam2 (Picamera2): PiCamera instance for capturing images.
+        frame_size (Tuple[int, int]): The resolution of the camera capture.
     """
-    
-    def __init__(self, detector: CatDetector, frame_size: Tuple[int, int] = (640, 480), buffer_size: int = 5):
-        """
-        Initialize the Camera object with a CatDetector and frame size.
-
-        Args:
-            detector (CatDetector): An instance of CatDetector
-            frame_size (Tuple[int, int]): Frame resolution, defaults to 640x480
-        """
+    def __init__(self, detector: CatDetector, frame_size: Tuple[int, int] = (640, 640)):
         self.detector = detector
         self.picam2 = Picamera2()
         self.frame_size = frame_size
-        camera_config = self.picam2.create_still_configuration(main={"size": self.frame_size})
-        self.picam2.configure(camera_config)
-        self.picam2.start()
-    
 
-    def capture_and_detect(self) -> Tuple[str, Optional[np.ndarray], Optional[np.ndarray]]:
+        try:
+            camera_config = self.picam2.create_still_configuration(main={"size": self.frame_size})
+            self.picam2.configure(camera_config)
+            self.picam2.start()
+        except Exception as e:
+            logging.error(f"Camera initialization failed: {e}")
+            raise
+
+    def capture_and_detect(self):
         """
-        Capture an image from the camera and detect objects.
+        Captures an image from the camera and processes it for object detection.
 
         Returns:
-            Tuple[str, Optional[np.ndarray], Optional[np.ndarray]]: A tuple containing the detection type, 
-            the image with detection box, and the original image.
+            tuple: The type of detection, processed image with bounding box, and original image.
         """
         logging.info("Capturing frame for object detection...")
-        frame = self.picam2.capture_array()
-        detection_type, detected_image, _ = self.detector.detect_cat_or_person(frame)
+        try:
+            frame = self.picam2.capture_array()
 
-        return detection_type, detected_image, frame
+            # Ensure frame is in the correct format (8-bit per channel)
+            if frame.dtype != np.uint8:
+                frame = np.clip(frame, 0, 255).astype(np.uint8)
+
+            detection_type, detected_image, bbox = self.detector.detect_cat_or_person(frame)
+            return detection_type, detected_image, frame
+        except Exception as e:
+            logging.error(f"Error in capture_and_detect: {e}")
+            return "error", None, None

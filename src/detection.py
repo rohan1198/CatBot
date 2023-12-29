@@ -1,33 +1,59 @@
 import cv2
+import logging
 import numpy as np
 from typing import Tuple, Optional
 from ultralytics import YOLO
 
 class CatDetector:
     """
-    CatDetector class for detecting cats and persons in images using YOLO.
+    Class for detecting cats and persons in images using YOLO model.
 
     Attributes:
-        model (YOLO): YOLO model for object detection.
-        cat_class_id (int): Class ID for cats in the YOLO model.
-        person_class_id (int): Class ID for persons in the YOLO model.
+        model_path (str): Path to the YOLO model file.
+        cat_class_id (int): Class ID for cats in the model.
+        person_class_id (int): Class ID for persons in the model.
     """
-
     def __init__(self, model_path: str):
+        try:
+            self.model = YOLO(model_path)
+            self.cat_class_id = 15
+            self.person_class_id = 0
+        except Exception as e:
+            logging.error(f"CatDetector initialization failed: {e}")
+            raise
+
+    def detect_cat_or_person(self, image: np.ndarray, resize_to: Optional[Tuple[int, int]] = None):
         """
-        Initialize the CatDetector with a YOLO model.
+        Detects a cat or person in the given image.
 
         Args:
-            model_path (str): Path to the YOLO model file.
-        """
-        self.model = YOLO(model_path)
-        self.cat_class_id = 15
-        self.person_class_id = 0
+            image (np.ndarray): The image to process.
+            resize_to (Optional[Tuple[int, int]]): Resize the image for faster processing.
 
-
-    def resize_image(self, image: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
+        Returns:
+            tuple: Detection type, image with bounding box, and bounding box coordinates.
         """
-        Resize an image to a target size.
+        try:
+            if resize_to:
+                image = self.resize_image(image, resize_to)
+
+            results = self.model.predict(source=image, save=False)
+            for r in results:
+                for box in r.boxes:
+                    detected_class = int(box.cls[0])
+                    if detected_class == self.cat_class_id:
+                        return self._process_detection(box, "cat", image)
+                    elif detected_class == self.person_class_id:
+                        return self._process_detection(box, "person", image)
+            return "none", None, None
+        except Exception as e:
+            logging.error(f"Error in detect_cat_or_person: {e}")
+            return "error", None, None
+
+    @staticmethod
+    def resize_image(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
+        """
+        Resizes the image to a specified target size.
 
         Args:
             image (np.ndarray): The original image.
@@ -38,39 +64,20 @@ class CatDetector:
         """
         return cv2.resize(image, target_size, interpolation=cv2.INTER_AREA)
 
-
-    def detect_cat_or_person(self, image: np.ndarray, resize_to: Optional[Tuple[int, int]] = None) -> Tuple[str, Optional[np.ndarray], Optional[Tuple[int, int, int, int]]]:
+    @staticmethod
+    def _process_detection(box, detection_type, image):
         """
-        Detects a cat or a person in the given image.
+        Process the detection and draw bounding box on the image.
 
         Args:
-            image (np.ndarray): The image to process.
-            resize_to (Optional[Tuple[int, int]]): Optional resize dimensions.
+            box: Detected bounding box.
+            detection_type (str): Type of detection ('cat' or 'person').
+            image (np.ndarray): Image on which to draw the bounding box.
 
         Returns:
-            Tuple[str, Optional[np.ndarray], Optional[Tuple[int, int, int, int]]]: Detection result, processed image, 
-            and bounding box coordinates.
+            tuple: Detection type, image with bounding box, and bounding box coordinates.
         """
-        try:
-            if resize_to:
-                image = self.resize_image(image, resize_to)
-
-            results = self.model.predict(source=image, save=False)
-
-            for r in results:
-                for box in r.boxes:
-                    detected_class = int(box.cls[0])
-                    if detected_class == self.cat_class_id:
-                        x1, y1, x2, y2 = map(int, box.xyxy[0])
-                        cv2.rectangle(image, (x1, y1), (x2, y2), (255, 0, 255), 3)
-                        return "cat", image, (x1, y1, x2, y2)
-                    elif detected_class == self.person_class_id:
-                        x1, y1, x2, y2 = map(int, box.xyxy[0])
-                        cv2.rectangle(image, (x1, y1), (x2, y2), (255, 255, 0), 3)
-                        return "person", image, (x1, y1, x2, y2)
-
-            return "none", None, None
-
-        except Exception as e:
-            logging.error(f"Error while detecting the cat or person: {e}")
-            return "error", None, None
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+        color = (255, 0, 255) if detection_type == "cat" else (255, 255, 0)
+        cv2.rectangle(image, (x1, y1), (x2, y2), color, 3)
+        return detection_type, image, (x1, y1, x2, y2)
