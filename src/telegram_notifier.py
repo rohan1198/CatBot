@@ -48,3 +48,16 @@ class TelegramNotifier:
             self.bot.send_photo(chat_id=self.chat_id, photo=img_encoded.tobytes(), caption=caption)
         except Exception as e:
             logging.error(f"Error sending photo: {e}")
+
+
+    async def send_error_message(self, error_message: str):
+        """
+        Sends an error message via Telegram.
+
+        Args:
+            error_message (str): The error message to send.
+        """
+        try:
+            await self.bot.send_message(chat_id=self.chat_id, text=error_message)
+        except Exception as e:
+            logging.error(f"Error sending error message via Telegram: {e}")
