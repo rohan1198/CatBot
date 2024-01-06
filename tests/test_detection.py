@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 
 
 picam2 = Picamera2()
-camera_config = picam2.create_still_configuration(main={"size": (1920, 1080)}, lores={"size": (640, 480)}, display="lores")
+camera_config = picam2.create_still_configuration(
+    main={
+        "size": (
+            1920, 1080)}, lores={
+                "size": (
+                    640, 480)}, display="lores")
 picam2.configure(camera_config)
 picam2.start()
 
@@ -38,12 +43,13 @@ while True:
 
         for box in boxes:
             x1, y1, x2, y2 = box.xyxy[0]
-            x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2) # convert to int values
+            x1, y1, x2, y2 = int(x1), int(y1), int(
+                x2), int(y2)  # convert to int values
 
             cv2.rectangle(img, (x1, y1), (x2, y2), (255, 0, 255), 3)
 
-            confidence = math.ceil((box.conf[0]*100))/100
-            print("Confidence --->",confidence)
+            confidence = math.ceil((box.conf[0] * 100)) / 100
+            print("Confidence --->", confidence)
 
             cls = int(box.cls[0])
             print("Class name -->", classNames[cls])
@@ -54,8 +60,14 @@ while True:
             color = (255, 0, 0)
             thickness = 2
 
-            cv2.putText(img, classNames[cls], org, font, fontScale, color, thickness)
-
+            cv2.putText(
+                img,
+                classNames[cls],
+                org,
+                font,
+                fontScale,
+                color,
+                thickness)
 
     cv2.imshow("Detection", img)
 

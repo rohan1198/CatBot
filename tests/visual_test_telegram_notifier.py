@@ -5,6 +5,7 @@ from src.camera import Camera
 from src.detection import CatDetector
 from src.telegram_notifier import TelegramNotifier
 
+
 def main():
     # Load environment variables
     load_dotenv()
@@ -30,10 +31,11 @@ def main():
     # Send captured image
     if image is not None:
         print("Sending captured image...")
-        notifier.send_photo(image, "This is a test image captured by the Raspberry Pi camera.")
+        notifier.send_photo(
+            image, "This is a test image captured by the Raspberry Pi camera.")
     else:
         print("No image captured.")
 
+
 if __name__ == '__main__':
     main()
-
