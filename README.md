@@ -27,6 +27,7 @@ CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for
 - Raspberry Pi 5
 - Camera Module
 - Python 3.x
+- OpenCV
 - Telegram Bot API Token
 - Onnx
 
@@ -105,3 +106,13 @@ sudo cp ~/CatBot/catbot.service /etc/systemd/system/
 sudo systemctl enable catbot.service
 sudo systemctl start catbot.service
 ```
+
+
+---
+
+### To Do
+
+- Collect data with the cat and train a custom yolov8l model.
+- Train model with quantization.
+- Sparsify model for faster inference.
+- Test new model.
