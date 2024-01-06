@@ -1,5 +1,7 @@
 # CatBot
 
+<img src="https://github.com/rohan1198/CatBot/blob/main/assets/detection.jpeg" width="400" height="780">
+
 
 ### Backstory
 Meet CatBot - a little project that turned into a big adventure! It all started with a friendly neighborhood cat that made my doorstep. This furry friend would pop by daily for some cozy time, especially during the cold winter months. Problem was, with me working away in my office, I often missed its visits, and leaving the door open in winter wasn't exactly ideal. Enter CatBot! This nifty system now lets me know when my four-legged buddy is waiting outside.
