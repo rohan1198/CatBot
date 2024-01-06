@@ -1,9 +1,11 @@
 import os
 import cv2
 import time
+import json
 import logging
 import asyncio
 import datetime
+from pathlib import Path
 from dotenv import load_dotenv
 from telegram.ext import ApplicationBuilder
 from src.camera import Camera
@@ -28,9 +30,10 @@ async def periodic_detection(bot, chat_id: str):
             current_time = time.time()
             current_hour = datetime.datetime.now().hour
 
-            if 18 <= current_hour < 24:
-                logging.info("Scheduled inactivity. Sleeping for 12 hours.")
-                await asyncio.sleep(43200)
+            if current_hour < 6 or current_hour >= 17:
+                logging.info("Scheduled inactivity. Sleeping until 6am.")
+                time_to_6am = ((24 - current_hour + 6) % 24) * 3600
+                await asyncio.sleep(time_to_6am)
                 continue
 
             if current_time - last_detection_time < cooldown_period:
@@ -46,14 +49,26 @@ async def periodic_detection(bot, chat_id: str):
                 detection_count[detection_type] += 1
 
                 if detection_type == "cat":
-                    cv2.imwrite(f"data/cat_detected_{current_time}_{i}.jpg", img_original)
+                    file_name = f"cat_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}.jpg"
+                    file_path = Path(f"data/detections/{datetime.datetime.now().strftime('%Y%m%d')}/{file_name}")
+                    file_path.parent.mkdir(parents=True, exist_ok=True)
+                    cv2.imwrite(str(file_path), img_original)
+
+                    metadata = {
+                        "timestamp": datetime.datetime.now().isoformat(),
+                        "detection_type": detection_type,
+                        "file_name": str(file_path)
+                    }
+
+                    with open(str(file_path.with_suffix(".json")), "w") as f:
+                        json.dump(metadata, f)
 
                 # Send notification if majority detection is confirmed
                 if detection_count['cat'] > 5 or detection_count['person'] > 5:
                     logging.info(f"Majority detection confirmed: {detection_type}")
                     success, encoded_image = cv2.imencode('.jpg', cv2.cvtColor(img_original, cv2.COLOR_BGR2RGB))
                     if success:
-                        await bot.send_photo(chat_id=chat_id, photo=encoded_image.tobytes(), caption=f"{detection_type.capitalize()} is at the door!")
+                        await bot.send_photo(chat_id=chat_id, photo=encoded_image.tobytes(), caption=f"{detection_type.capitalize()} detected!")
                         break
 
                     last_detection_time = current_time
@@ -62,9 +77,21 @@ async def periodic_detection(bot, chat_id: str):
 
             logging.info("Cycle complete. Sleeping for 30 seconds")
             await asyncio.sleep(30)
+        
+        except RuntimeError as e:
+            error_message = ""
+
+            if str(e) == "CameraError":
+                error_message = "Critical: Camera malfunction."
+            elif str(e) == "ObjectDetectionError":
+                error_message = "Critical: Object Detection failure."
+
+            logging.critical(error_message)
+            await notifier.send_error_message(error_message)
+
         except Exception as e:
-            logging.error(f"Error in periodic_detection: {e}")
-            await bot.send_message(chat_id=chat_id, text=f"Error detected: {e}")
+            logging.error(f"Unexpected Error: {e}")
+
 
 
 def start_bot_polling(application):
@@ -91,6 +118,7 @@ def main():
     try:
         application = ApplicationBuilder().token(bot_token).build()
         bot = application.bot
+        notifier = TelegramNotifier(bot_token, default_chat_id)
 
         detector = CatDetector(model_path)
         global camera

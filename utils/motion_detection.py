@@ -1,26 +1,50 @@
 import cv2
-import logging
 import numpy as np
-from collections import deque
-from typing import Deque
+from typing import Tuple, Optional
 
-class MotionDetector:
-    def __init__(self, buffer_size: int = 5, threshold: int = 25):
-        self.buffer_size = buffer_size
+class MotionDetector(object):
+    def __init__(self, threshold: float = 25.0, min_area: int = 500):
+        """
+        Initialize the MotionDetector
+
+        Args:
+            threshold (float): The threshold for detecting motion.
+            min_area (int): The minimum area of the contours to consider as motion.
+        """
         self.threshold = threshold
-        self.frames: Deque[np.ndarray] = deque(maxlen=self.buffer_size)
+        self.min_area = min_area
+        self.previous_frame = None
 
-    def update_frame(self, frame: np.ndarray):
-        logging.info("Updating frame in motion detector...")
-        gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        self.frames.append(gray_frame)
+    def detect_motion(self, frame: np.ndarray) -> Tuple[bool, Optional[np.ndarray]]:
+        """
+        DEetect motion in the given frame.
 
-    def is_motion_detected(self) -> bool:
-        logging.info("Analysing frames for motion...")
-        if len(self.frames) < self.buffer_size:
-            return False
+        Args:
+            frame (np.ndarray): The frame in which to detect motion.
+        
+        Returns:
+            Tuple[bool, Optional[np.ndarray]]: A tuple containing a boolean indicating if
+                                               motion is detected and the threshold image.
+        """
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
-        avg_frame = np.mean(np.stack(self.frames, axis=0), axis=0).astype(np.uint8)
-        frame_delta = cv2.absdiff(self.frames[-1], avg_frame)
-        _, thresh = cv2.threshold(frame_delta, self.threshold, 255, cv2.THRESH_BINARY)
-        return np.sum(thresh) > 0
+        if self.previous_frame is None:
+            self.previous_frame = gray
+            return False, None
+        
+        frame_delta = cv2.absdiff(self.previous_frame, gray)
+        thresh = cv2.threshold(frame_delta, self.threshold, 255, cv2.THRESH_BINARY)[1]
+
+        thresh = cv2.dilate(thresh, None, iterations=2)
+        contours, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        for contour in contours:
+            if cv2.contourArea(contour) < self.min_area:
+                continue
+
+            self.previous_frame = gray
+            return True, thresh
+        
+        self.previous_frame = gray
+        return False, None

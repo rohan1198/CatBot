@@ -4,6 +4,7 @@ import numpy as np
 from picamera2 import Picamera2
 from typing import Tuple
 from src.detection import CatDetector
+from utils.motion_detection import MotionDetector
 
 
 class Camera:
@@ -19,6 +20,7 @@ class Camera:
         self.detector = detector
         self.picam2 = Picamera2()
         self.frame_size = frame_size
+        self.motion_detector = MotionDetector()
 
         try:
             camera_config = self.picam2.create_still_configuration(main={"size": self.frame_size})
@@ -35,16 +37,20 @@ class Camera:
         Returns:
             tuple: The type of detection, processed image with bounding box, and original image.
         """
-        logging.info("Capturing frame for object detection...")
+        logging.info("Capturing frame for motion detection...")
         try:
             frame = self.picam2.capture_array()
 
-            # Ensure frame is in the correct format (8-bit per channel)
             if frame.dtype != np.uint8:
                 frame = np.clip(frame, 0, 255).astype(np.uint8)
 
-            detection_type, detected_image, bbox = self.detector.detect_cat_or_person(frame)
-            return detection_type, detected_image, frame
+            motion_detected, _ = self.motion_detector.detect_motion(frame)
+            if motion_detected:
+                logging.info("Motion detected. Processing frame for object detection...")
+                detection_type, detected_image, _ = self.detector.detection(frame)
+                return detection_type, detected_image, frame
+            else:
+                return "no motion", None, None
         except Exception as e:
-            logging.error(f"Error in capture_and_detect: {e}")
-            return "error", None, None
+            logging.error(f"Camera or Motion Detection Error: {e}")
+            raise RuntimeError("CameraError")
