@@ -30,6 +30,7 @@ CatBot is a Raspberry Pi-based cat detection system. It uses a camera module for
 - Camera Module
 - Python 3.x
 - OpenCV
+- YOLOv8
 - Telegram Bot API Token
 - Onnx
 
