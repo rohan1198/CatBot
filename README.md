@@ -1,6 +1,6 @@
 # CatBot
 
-<img src="https://github.com/rohan1198/CatBot/blob/main/assets/detection.jpeg" width="400" height="780">
+<img src="assets/detection.jpeg" width="400" height="780">
 
 
 ### Backstory
