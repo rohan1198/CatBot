@@ -3,8 +3,11 @@ Description=Cat Detection system
 After=network.target
 
 [Service]
-ExecStart=/bin/bash /home/raspi/CatBot/cat_detector.sh
-Restart=always
+Type=forking
+ExecStart=/bin/bash /home/raspi/CatBot/cat_detector.sh start
+ExecStop=/bin/bash /home/raspi/CatBot/cat_detector.sh stop
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
