@@ -2,7 +2,9 @@ import cv2
 import logging
 import telegram
 import numpy as np
+import asyncio
 from typing import Optional
+from src.camera import Camera
 
 
 class TelegramNotifier:
@@ -61,3 +63,19 @@ class TelegramNotifier:
             await self.bot.send_message(chat_id=self.chat_id, text=error_message)
         except Exception as e:
             logging.error(f"Error sending error message via Telegram: {e}")
+
+
+    async def send_current_frame(self, camera: Camera):
+        """
+        Captures the current frame from the camera and sends it as a photo.
+        Meant to be a test function.
+
+        Args:
+            camera (Camera): The camera object to capture the frame.
+        """
+        try:
+            img = camera.capture_frame()
+            await asyncio.get_running_loop().run_in_executor(None, lambda: self.send_photo(img, "Current Frame"))
+        except Exception as e:
+            logging.error(f"Error in capturing/sending current frame: {e}")
+            await self.send_message("Error: Unable to capture and send current frame")

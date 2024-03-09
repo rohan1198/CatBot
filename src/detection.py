@@ -22,7 +22,6 @@ class CatDetector:
             logging.error(f"CatDetector initialization failed: {e}")
             raise
 
-
     def detection(self, image: np.ndarray, resize_to: Optional[Tuple[int, int]] = None):
         """
         Detects a cat or person in the given image.
@@ -46,11 +45,10 @@ class CatDetector:
                         return self._process_detection(box, "cat", image)
                     elif detected_class == self.person_class_id:
                         return self._process_detection(box, "person", image)
-            return "none", None, None
+            return "none", image, None
         except Exception as e:
             logging.error(f"Object Detection Error: {e}")
             raise RuntimeError("ObjectDetectionError")
-
 
     @staticmethod
     def resize_image(image: np.ndarray, target_size: Tuple[int, int]) -> np.ndarray:
@@ -65,7 +63,6 @@ class CatDetector:
             np.ndarray: The resized image.
         """
         return cv2.resize(image, target_size, interpolation=cv2.INTER_AREA)
-
 
     @staticmethod
     def _process_detection(box, detection_type, image):

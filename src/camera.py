@@ -4,7 +4,7 @@ import numpy as np
 from picamera2 import Picamera2
 from typing import Tuple
 from src.detection import CatDetector
-from utils.motion_detection import MotionDetector
+#from utils.motion_detection import MotionDetector
 
 
 class Camera:
@@ -20,7 +20,7 @@ class Camera:
         self.detector = detector
         self.picam2 = Picamera2()
         self.frame_size = frame_size
-        self.motion_detector = MotionDetector()
+        #self.motion_detector = MotionDetector()
 
         try:
             camera_config = self.picam2.create_still_configuration(main={"size": self.frame_size})
@@ -29,6 +29,25 @@ class Camera:
         except Exception as e:
             logging.error(f"Camera initialization failed: {e}")
             raise
+
+
+    def capture_frame(self) -> np.ndarray:
+        """
+        Captures a single frame from the camera.
+
+        Returns:
+            np.ndarray: The captured frame
+        """
+        try:
+            frame = self.picam2.capture_array()
+            if frame.dtype != np.uint8:
+                frame = np.clip(frame, 0, 255).astype(np.uint8)
+            return frame
+        
+        except Exception as e:
+            logging.error(f"Error capturing frame: {e}")
+            raise RuntimeError("CameraError")
+
 
     def capture_and_detect(self):
         """
@@ -44,13 +63,15 @@ class Camera:
             if frame.dtype != np.uint8:
                 frame = np.clip(frame, 0, 255).astype(np.uint8)
 
-            motion_detected, _ = self.motion_detector.detect_motion(frame)
-            if motion_detected:
-                logging.info("Motion detected. Processing frame for object detection...")
-                detection_type, detected_image, _ = self.detector.detection(frame)
-                return detection_type, detected_image, frame
-            else:
-                return "no motion", None, None
+            frame_copy = np.copy(frame)
+            
+            #motion_detected, _ = self.motion_detector.detect_motion(frame)
+            #if motion_detected:
+            logging.info("Motion detected. Processing frame for object detection...")
+            detection_type, detected_image, _ = self.detector.detection(frame_copy)
+            return detection_type, detected_image, frame
+            #else:
+            #    return "no motion", None, None
         except Exception as e:
             logging.error(f"Camera or Motion Detection Error: {e}")
             raise RuntimeError("CameraError")
